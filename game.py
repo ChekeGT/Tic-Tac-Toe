@@ -1,5 +1,6 @@
 from player import HumanPlayer as Player
-from player import MachinePlayer as Machine
+from player import GeniusComputerPlayer as Machine
+from player import MachinePlayer as DumbMachine
 import time
 
 class Board:
@@ -50,7 +51,7 @@ class Board:
                        blank_spaces.append((pointer))
         return blank_spaces
     
-    def make_a_move(self, p, player):
+    def make_a_move(self, p, player_mark):
          
         if p in self.get_blank_spaces():
             pointer = -1
@@ -60,10 +61,19 @@ class Board:
                     pointer += 1
                     if pointer == p:
                         element_pointer = x
-            self.board[row_pointer][element_pointer] = player.mark
+            self.board[row_pointer][element_pointer] = player_mark
         else:
             raise ValueError
-            
+        
+    def undo_move(self, p):
+        pointer = -1
+        row_pointer = p // 3
+        for row in self.board:
+            for x in range(0, 3):
+                pointer += 1
+                if pointer == p:
+                    element_pointer = x
+        self.board[row_pointer][element_pointer] = ' '
                          
     
     def get_diagonals(self):
@@ -78,7 +88,6 @@ class Board:
 class Game:
     
     def __init__(self) -> None:
-        self.board = Board()
         print("Welcome to the Tic Tac Toe Game. Hope you have some fun while playing it")
         # Creating a player 
         option = input("1) Play on Two player mode\n 2) Play vs the machine\n")
@@ -102,6 +111,7 @@ class Game:
             self.p2 = Machine("X" if p1_mark == "O" else "O")
     
     def play(self):
+        self.board = Board()
         turn = 2
         while self.board.game_has_been_winned() == False and len(self.board.get_blank_spaces()) > 0:
             if turn % 2 == 0:
@@ -111,12 +121,12 @@ class Game:
             else:
                 self.p2.play(self.board)
                 turn += 1
-        if len(self.board.get_blank_spaces()) == 0:
-            print("It is a tie.")
-        else:
+        if self.board.game_has_been_winned():
             winner = self.board.game_has_been_winned()
             print(f"{self.p1 if self.p1.mark == winner else self.p2} is the winner, congratulations!!")
             print(f"And this is the board {self.board}")
+        else:
+            print('It is a tie')
             
 
     def menu(self) -> None:
